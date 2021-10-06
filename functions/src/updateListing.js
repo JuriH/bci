@@ -18,6 +18,7 @@ const schema = {
         askingPrice: { type: "string" },
         shipping: { type: "boolean" },
         pickup: { type: "boolean" },
+        manufacturer: { type: "string" },
         image1: { isFileType: true },
         image2: { isFileType: true },
         image3: { isFileType: true },
@@ -32,6 +33,7 @@ const schema = {
         "askingPrice",
         "shipping",
         "pickup",
+        "manufacturer",
         "image1",
         "image2",
         "image3",
@@ -71,7 +73,7 @@ module.exports = (app) => {
                 const doc = await docRef.get()
                 const docData = doc.data()
                 if (userCredentials.localId !== docData.creatorId) {
-                    res.sendStatus(401)
+                    res.status(401).send({ message: "Unauthorized" })
                     return
                 }
             } catch (err) {

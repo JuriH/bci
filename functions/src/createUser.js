@@ -82,12 +82,14 @@ module.exports = (app) => {
                     res.status(500).send({
                         message: "Error occurred when registering user",
                     })
+                    return
                 }
 
                 res.status(201).send({
                     message: "User created successfully",
                     uid: userCredentials.uid,
                 })
+                return
             } catch (err) {
                 console.log(err)
                 res.status(400).send({

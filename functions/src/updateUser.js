@@ -13,7 +13,7 @@ module.exports = (app) => {
 
             if (req.body.name !== undefined) {
                 if (regex("name", req.body.name)) {
-                    toUpdate.name = req.body.name
+                    toUpdate.displayName = req.body.name
                 } else {
                     res.status(409).send({
                         message: "Invalid name given",
@@ -40,7 +40,7 @@ module.exports = (app) => {
                 }
             if (req.body.phone !== undefined) {
                 if (regex("phone", req.body.phone)) {
-                    toUpdate.phone = req.body.phone
+                    toUpdate.phoneNumber = req.body.phone
                 } else {
                     res.status(409).send({
                         message: "Invalid phone number given",
@@ -48,19 +48,31 @@ module.exports = (app) => {
                 }
             }
 
-            const decodedIdToken = admin.auth().verifyIdToken(getToken(req))
+            const decodedIdToken = await admin
+                .auth()
+                .verifyIdToken(getToken(req))
             console.log(JSON.stringify(decodedIdToken))
 
             // Update Firebase user-object with admin SDK
             await admin.auth().updateUser(decodedIdToken.uid, toUpdate)
 
+            if (req.body.password !== undefined) {
+                console.log(toUpdate)
+                await admin.auth().updateUser(decodedIdToken.uid, {
+                    toUpdate,
+                })
+
+                // Delete password from object so it won't be stored in Firestore
+                delete toUpdate.password
+            }
+
             // Update user's document
             await firestore
-                .collection(userCollection)
+                .collection("users")
                 .doc(decodedIdToken.uid)
                 .set(toUpdate, { merge: true })
 
-            res.status(200)
+            res.status(200).send({ message: "User updated" })
         } catch (err) {
             console.log(err)
             res.status(400).send({

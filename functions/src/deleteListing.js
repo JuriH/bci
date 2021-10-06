@@ -21,7 +21,9 @@ async function deleteFromUser(uid, listingId) {
 }
 
 function deleteFromStorage(uid, listingId) {
-    const bucket = admin.storage().bucket(functions.config().bci.storage.bucket)
+    const bucket = admin
+        .storage()
+        .bucket(functions.config().bci.storage.bucket.default.name)
 
     bucket.deleteFiles(
         {
@@ -51,7 +53,7 @@ module.exports = (app) => {
         // Check if document found for given user ID
         if (!userDoc.exists) {
             res.status(404).send({
-                message: "No user-document found for given token",
+                message: "No matching listing found for user",
             })
             return
         }

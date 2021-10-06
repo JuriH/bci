@@ -5,10 +5,9 @@ const functions = require("firebase-functions")
 
 // Initialize app once
 if (!admin.apps.length) {
+    const serviceAccount = require("./building-cloud-integration-a9feb99c7120.json")
     admin.initializeApp({
-        credential: admin.credential.cert(
-            "building-cloud-integration-a9feb99c7120.json"
-        ),
+        credential: admin.credential.cert(serviceAccount),
         storageBucket: functions.config().bci.storage.bucket.default.url,
     })
 }

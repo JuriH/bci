@@ -6,9 +6,6 @@ const apiUrl = `http://${getMachineIp()}:${
     functions.config().bci.functions.port
 }/building-cloud-integration/us-central1/bci`
 
-// const apiUrl =
-//     "http://100.66.176.125:5001/building-cloud-integration/us-central1/bci"
-
 const { expect } = require("chai")
 const chai = require("chai")
 const chaiHttp = require("chai-http")
