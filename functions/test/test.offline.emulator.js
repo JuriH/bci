@@ -1,8 +1,13 @@
 require("module-alias/register")
+const getMachineIp = require("@utils/getMachineIp")
 const { functions } = require("@init")
 
-const apiUrl =
-    "http://192.168.1.103:5001/building-cloud-integration/us-central1/bci"
+const apiUrl = `http://${getMachineIp()}:${
+    functions.config().bci.functions.port
+}/building-cloud-integration/us-central1/bci`
+
+// const apiUrl =
+//     "http://100.66.176.125:5001/building-cloud-integration/us-central1/bci"
 
 const { expect } = require("chai")
 const chai = require("chai")
@@ -324,6 +329,7 @@ describe("Offline tests with Firebase Emulator", () => {
                     expect(res.body.token).to.be.a("string")
                     expect(res.body.refreshToken).to.be.a("string")
                     // Store tokens to use in another tests that require tokens
+                    console.log("received token: " + res.body.token)
                     auth1.token = res.body.token
                     auth1.refreshToken = res.body.refreshToken
                     done()
@@ -606,6 +612,7 @@ describe("Offline tests with Firebase Emulator", () => {
                     .set("content-type", "multipart/form-data")
                     // .query({ creatorId: auth1.uid })
                     .end((err, res) => {
+                        // console.log(res.body)
                         expect(err).to.be.null
                         expect(res).to.have.status(200)
                         expect(res.body.listings).to.be.an("array")

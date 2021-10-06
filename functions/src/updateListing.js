@@ -89,7 +89,11 @@ module.exports = (app) => {
 
             // If there are any images, upload them to Storage
             if (images !== undefined && images.length > 0) {
-                uploadImagesToStorage(images, "default-bucket", storagePath)
+                uploadImagesToStorage(
+                    images,
+                    functions.config().bci.bucket.default.name,
+                    storagePath
+                )
             }
 
             // Create listing first and then add its generated document ID to user-document

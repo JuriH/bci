@@ -6,7 +6,7 @@ const isValidJson = require("@middleware/isValidJson")
 const minFilesMiddleware = require("@middleware/minFilesMiddleware")
 const uploadImagesToStorage = require("@utils/uploadImagesToStorage")
 const addListingToFirestore = require("@utils/addListingToFirestore")
-const { admin } = require("@init")
+const { admin, functions } = require("@init")
 const { v4: uuidv4 } = require("uuid")
 
 async function addListingToUser(res, uid, listingId) {
@@ -29,7 +29,7 @@ async function addListingToUser(res, uid, listingId) {
                 listings = newListings
             }
             // Merge the created/updated listings-array to user's document
-            admin.firestore().collection("users").doc(uid).set(
+            await admin.firestore().collection("users").doc(uid).set(
                 {
                     listings: listings,
                 },
@@ -82,7 +82,7 @@ const schema = {
 //
 module.exports = (app) => {
     app.post(
-        "/listings/",
+        "/listings",
         verifyToken,
         isValidJson({ schema }),
         busboyMiddleware({
@@ -91,10 +91,12 @@ module.exports = (app) => {
         }),
         minFilesMiddleware(1),
         async (req, res) => {
+            console.log("createListing")
             // Get images from request via Busboy-middleware
             const images = req.files
 
             const userCredentials = await getUserCredentialsFromToken(req)
+            console.log("creds: " + userCredentials.localId)
 
             // Check that all given files are either JPEG, JPG, or PNG
             images.some((image) => {
@@ -120,7 +122,11 @@ module.exports = (app) => {
             // Storage path to store listing's images
             const storagePath = `listings/${userCredentials.localId}/${listingId}/`
 
-            uploadImagesToStorage(images, "default-bucket", storagePath)
+            uploadImagesToStorage(
+                images,
+                functions.config().bci.storage.bucket.default.name,
+                storagePath
+            )
 
             // Create listing first and then add its generated document ID to user-document
             await addListingToFirestore(

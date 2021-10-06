@@ -1,6 +1,6 @@
+require("module-alias/register")
+const getMachineIp = require("@utils/getMachineIp")
 const admin = require("firebase-admin")
-const ip = "192.168.1.103" // Localhost testing IP
-
 const functions = require("firebase-functions")
 
 // Initialize app once
@@ -18,7 +18,7 @@ const auth = admin.auth()
 const firestore = admin.firestore()
 firestore.settings({
     host: process.env.FUNCTIONS_EMULATOR
-        ? `${ip}:${functions.config().bci.firestore.port}`
+        ? `${getMachineIp()}:${functions.config().bci.firestore.port}`
         : `localhost:${functions.config().bci.firestore.port}`,
     ssl: false,
 })
@@ -44,5 +44,4 @@ module.exports = {
     functions,
     firestore,
     app,
-    ip,
 }

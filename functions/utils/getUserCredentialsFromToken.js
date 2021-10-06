@@ -1,19 +1,27 @@
 require("module-alias/register")
 const fetch = require("node-fetch")
+const getMachineIp = require("@utils/getMachineIp")
 const { functions } = require("@init")
 
 // Get email and password from BASIC Auth
 module.exports = async function getUserCredentialsFromToken(req) {
-    if (req.headers.authorization === undefined) return null
-    const token = req.headers.authorization
+    if (req.get("authorization") === undefined) return null
+    const token = req
+        .get("authorization")
         .substring(
-            req.headers.authorization.indexOf(" "),
-            req.headers.authorization.length
+            req.get("authorization").indexOf(" "),
+            req.get("authorization").length
         )
         .trim()
 
+    console.log("token: " + token)
+
     const data = await fetch(
-        `http://192.168.1.103:9099/identitytoolkit.googleapis.com/v1/accounts:lookup?key=
+        `http://${
+            process.env.FUNCTIONS_EMULATOR
+                ? `${getMachineIp()}:${functions.config().bci.auth.port}/`
+                : ""
+        }identitytoolkit.googleapis.com/v1/accounts:lookup?key=
         ${functions.config().bci.key}`,
         {
             method: "POST",
@@ -26,6 +34,7 @@ module.exports = async function getUserCredentialsFromToken(req) {
         }
     )
     let userCredentials = await data.json()
+    console.log("getUserCreds: " + userCredentials)
     userCredentials = userCredentials.users[0]
     return userCredentials
 }
