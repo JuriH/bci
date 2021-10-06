@@ -1,0 +1,954 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Marketplace",
+        "version": "1.0",
+        "description": "This is a gateway for a marketplace service, which allows browsing and trading of products",
+        "contact": {
+            "name": "Aleksi Varrio",
+            "email": "c9vaal00@students.oamk.fi"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000"
+        }
+    ],
+    "paths": {
+        "/users": {
+            "post": {
+                "summary": "Register",
+                "operationId": "post-users",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User created successfully",
+                                            "description": "Details about success message"
+                                        },
+                                        "uid": {
+                                            "type": "string",
+                                            "example": "ajoh8fohow8hfåsehgo3hg",
+                                            "description": "User id for user account control"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Register as an user to the service",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserWithPassword"
+                            },
+                            "examples": {}
+                        }
+                    },
+                    "description": "Information about the user"
+                }
+            },
+            "put": {
+                "summary": "Update user info",
+                "operationId": "put-users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Update user information",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserUpdate"
+                            },
+                            "examples": {}
+                        }
+                    },
+                    "description": "User data to be updated"
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        },
+        "/login": {
+            "post": {
+                "summary": "Login",
+                "operationId": "post-login",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tokens"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Login to the service with a registered user account",
+                "security": [
+                    {
+                        "HTTPBasic": []
+                    }
+                ]
+            }
+        },
+        "/tokens": {
+            "get": {
+                "summary": "Get new token",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "operationId": "get-tokens",
+                "description": "Use refresh token to get a new token after old expired",
+                "x-internal": true
+            }
+        },
+        "/listings": {
+            "get": {
+                "summary": "Get listings",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "multipart/form-data": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GetListings"
+                                    }
+                                },
+                                "examples": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "get-listings",
+                "description": "Search listings with queryparameters",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "Sports"
+                        },
+                        "in": "query",
+                        "name": "category",
+                        "description": "Category of products"
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "New York"
+                        },
+                        "in": "query",
+                        "name": "location",
+                        "description": "Location as a city name"
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "2019-12-25"
+                        },
+                        "in": "query",
+                        "name": "date",
+                        "description": "Date in ISO 8601 format"
+                    }
+                ]
+            },
+            "post": {
+                "summary": "Create a listing",
+                "operationId": "post-listings",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message",
+                                            "example": "Created succesfully"
+                                        },
+                                        "listingId": {
+                                            "type": "string",
+                                            "example": "78947894237894",
+                                            "description": "Unique id of the successfully created listing"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Create a new listing",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Listing"
+                            },
+                            "examples": {}
+                        }
+                    },
+                    "description": "Detailed information about the listing"
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        },
+        "/listings/{id}": {
+            "parameters": [
+                {
+                    "schema": {
+                        "type": "string"
+                    },
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "Unique listing id"
+                }
+            ],
+            "put": {
+                "summary": "Update listing",
+                "operationId": "put-listings-id",
+                "description": "Update an existing listing with the listing id",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ListingUpdate"
+                            },
+                            "examples": {}
+                        }
+                    },
+                    "description": "Listing details to be updated"
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "Delete listing",
+                "operationId": "delete-listings-id",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Listing Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Delete an existing listing with the listing id",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "title": "User",
+                "type": "object",
+                "description": "User information",
+                "x-examples": {
+                    "User data example": {
+                        "name": "Jack Example",
+                        "phone": "+358401234567",
+                        "email": "example@example.com"
+                    }
+                },
+                "x-internal": false,
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the user account holder",
+                        "example": "Jack Example"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+358401234567",
+                        "description": "Phone number of the account holder with country code",
+                        "pattern": "^\\+[1-9]{1}[0-9]{3,14}$"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "example@example.com",
+                        "description": "Email of the user account holder",
+                        "pattern": "(?:[a-z0-9!#$%&'*+\\/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+\\/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
+                    }
+                },
+                "required": ["name", "phone", "email"]
+            },
+            "UserWithPassword": {
+                "title": "User",
+                "type": "object",
+                "description": "User information with password",
+                "x-examples": {
+                    "User data example with password": {
+                        "name": "Jack Example",
+                        "phone": "+358401234567",
+                        "email": "example@example.com",
+                        "password": "P@ssW0rd"
+                    }
+                },
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Jack Example",
+                        "description": "Name of the user account holder"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+358401234567",
+                        "description": "Phone number of the account holder with country code",
+                        "pattern": "^\\+[1-9]{1}[0-9]{3,14}$"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "example@example.com",
+                        "description": "Email of the user account holder",
+                        "pattern": "(?:[a-z0-9!#$%&'*+\\/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+\\/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "P@ssW0rd",
+                        "description": "Password for account authentication",
+                        "pattern": "^.{6,}$"
+                    }
+                },
+                "required": ["name", "phone", "email", "password"]
+            },
+            "UserUpdate": {
+                "title": "User Update",
+                "type": "object",
+                "description": "User information to update database",
+                "x-examples": {
+                    "User data example for updating data": {
+                        "name": "Jack Example",
+                        "phone": "+358401234567",
+                        "email": "example@example.com",
+                        "password": "P@ssW0rd"
+                    }
+                },
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Jack Example",
+                        "description": "Name to be updated"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+358401234567",
+                        "description": "Phone number to be udpated with country code",
+                        "pattern": "^\\+[1-9]{1}[0-9]{3,14}$"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "example@example.com",
+                        "description": "Email to be updated",
+                        "pattern": "(?:[a-z0-9!#$%&'*+\\/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+\\/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "P@ssW0rd",
+                        "description": "Password to be updated",
+                        "pattern": "^.{6,}$"
+                    }
+                }
+            },
+            "Listing": {
+                "title": "Listing",
+                "type": "object",
+                "description": "Detailed information about the listing",
+                "x-examples": {
+                    "Listing example": {
+                        "title": "Radio-controlled car",
+                        "description": "This rc car was barely used so it is in good condition",
+                        "category": "Hobbies",
+                        "location": "New York",
+                        "image1": "ijfeijfwh0fwhfhj09f09f093wj9fj9w3f",
+                        "image2": "jfr03wjf0w93hfj09whj09fhj0w3gf",
+                        "image3": "9hfw8008fg083wf0w938hfg983w",
+                        "image4": "fowiuh3f98w39fh89w38fh83wf",
+                        "askingPrice": "99.95",
+                        "manufacturer": "string",
+                        "shipping": true,
+                        "pickup": true
+                    }
+                },
+                "x-internal": false,
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Product main title",
+                        "example": "Radio-controlled car"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Detailed description of the product",
+                        "example": "This rc car was barely used so it is in good condition"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Category in which the product belongs",
+                        "example": "Hobbies"
+                    },
+                    "location": {
+                        "type": "string",
+                        "description": "Location as a city name",
+                        "example": "New York"
+                    },
+                    "image1": {
+                        "description": "Image of the product in binary format",
+                        "example": "ijfeijfwh0fwhfhj09f09f093wj9fj9w3f",
+                        "nullable": true
+                    },
+                    "image2": {
+                        "description": "Second image of the product in binary format",
+                        "example": "jfr03wjf0w93hfj09whj09fhj0w3gf",
+                        "nullable": true
+                    },
+                    "image3": {
+                        "description": "Third image of the product in binary format",
+                        "example": "9hfw8008fg083wf0w938hfg983w",
+                        "nullable": true
+                    },
+                    "image4": {
+                        "description": "Fourth image of the product in binary format",
+                        "example": "fowiuh3f98w39fh89w38fh83wf",
+                        "nullable": true
+                    },
+                    "askingPrice": {
+                        "type": "string",
+                        "description": "Price for the listing in EUR without special characters",
+                        "example": "99.95"
+                    },
+                    "manufacturer": {
+                        "type": "string",
+                        "description": "Manufacturer of product"
+                    },
+                    "shipping": {
+                        "type": "boolean",
+                        "description": "Whether shipping is available"
+                    },
+                    "pickup": {
+                        "description": "Whether item pickup is available",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "title",
+                    "description",
+                    "category",
+                    "location",
+                    "image1",
+                    "askingPrice",
+                    "manufacturer",
+                    "shipping",
+                    "pickup"
+                ]
+            },
+            "ListingUpdate": {
+                "description": "Detailed information about listing when updating a listing",
+                "type": "object",
+                "x-examples": {
+                    "Example of listing update data": {
+                        "title": "Fishing rod",
+                        "description": "Good condition",
+                        "category": "Fishing",
+                        "location": "New York",
+                        "image1": null,
+                        "image2": null,
+                        "image3": null,
+                        "image4": null,
+                        "askingPrice": "20",
+                        "manufacturer": "Shimano",
+                        "shipping": true,
+                        "pickup": false
+                    }
+                },
+                "title": "Listing Update",
+                "x-internal": false,
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "example": "Fishing rod",
+                        "description": "Product title"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Good condition",
+                        "description": "Detailed description of the product"
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "Fishing",
+                        "description": "Category of the product"
+                    },
+                    "location": {
+                        "type": "string",
+                        "example": "New York",
+                        "description": "Location as a city name"
+                    },
+                    "image1": {
+                        "description": "First image of the product",
+                        "nullable": true
+                    },
+                    "image2": {
+                        "description": "Second image of the product",
+                        "nullable": true
+                    },
+                    "image3": {
+                        "description": "Third image of the product",
+                        "nullable": true
+                    },
+                    "image4": {
+                        "description": "Fourth image of the product",
+                        "nullable": true
+                    },
+                    "askingPrice": {
+                        "type": "string",
+                        "description": "Price of the product",
+                        "example": "20"
+                    },
+                    "manufacturer": {
+                        "type": "string",
+                        "description": "Manufacturer of the product",
+                        "example": "Shimano"
+                    },
+                    "shipping": {
+                        "type": "boolean",
+                        "description": "Whether shipping is available"
+                    },
+                    "pickup": {
+                        "type": "boolean",
+                        "description": "Whether pickup is available"
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "title": "ErrorResponse",
+                "type": "object",
+                "description": "Error response message with error description",
+                "x-examples": {
+                    "Error message example": {
+                        "errorDescription": "Missing email field"
+                    }
+                },
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Missing email field",
+                        "description": "Information about error"
+                    }
+                }
+            },
+            "Tokens": {
+                "title": "Tokens",
+                "type": "object",
+                "description": "Tokens used for authorization",
+                "x-examples": {
+                    "Token data example": {
+                        "token": "h9f3w8f9hw938hf9hw3f3wf.fwfw08h308w3h0fhw038fh0w3hf03w8hf.f08hfw0hf98w3h98h9wh9f83w",
+                        "refreshToken": "2--7GmPurmUGIzd_tKuabuW023izra36JLTRBDWxJj19sNbfuobf60SVKKttLwZ7-ZICid0DX4b4oAVsHR5p8lisQPotnUDNQxdyCnGSl9iUzElbpGmaJ2umTvqWZxf4AIR_VWp-VtOjO2M1RSBHPJchvmA8FQtJ-Hw-1slHVabvMIWileKRwzKNQa4AgM7t6MTjVGfVg2aU"
+                    }
+                },
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "Token for bearer authorization",
+                        "example": "h9f3w8f9hw938hf9hw3f3wf.fwfw08h308w3h0fhw038fh0w3hf03w8hf.f08hfw0hf98w3h98h9wh9f83w"
+                    },
+                    "refreshToken": {
+                        "type": "string",
+                        "description": "Used to get a new token after expiration",
+                        "example": "2--7GmPurmUGIzd_tKuabuW023izra36JLTRBDWxJj19sNbfuobf60SVKKttLwZ7-ZICid0DX4b4oAVsHR5p8lisQPotnUDNQxdyCnGSl9iUzElbpGmaJ2umTvqWZxf4AIR_VWp-VtOjO2M1RSBHPJchvmA8FQtJ-Hw-1slHVabvMIWileKRwzKNQa4AgM7t6MTjVGfVg2aU"
+                    }
+                }
+            },
+            "SuccessResponse": {
+                "title": "SuccessResponse",
+                "type": "object",
+                "x-examples": {
+                    "Success response example": {
+                        "message": "User updated succesfully"
+                    }
+                },
+                "description": "Detailed success message",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "User updated succesfully",
+                        "description": "Information about successful request"
+                    }
+                }
+            },
+            "GetListings": {
+                "description": "Detailed information about fetched listings",
+                "type": "object",
+                "x-examples": {
+                    "Listing details example": {
+                        "listings": [
+                            {
+                                "images": "listings/0t36Pf9h8s98sh9g8LCtRZrw9/73wj0gwg-w-g-wgb-8078-ee5dd1107eec/",
+                                "creatorId": "fpjhw09hg0wh4g0whg4g",
+                                "askingPrice": "99",
+                                "description": "Fun toy",
+                                "pickup": true,
+                                "listingId": "f0ihw03shg08hg0s8hgs3",
+                                "title": "Toy car",
+                                "manufacturer": "Hasbro",
+                                "shipping": true,
+                                "location": "Helsinki",
+                                "category": "Toys",
+                                "createdAt": {
+                                    "_seconds": 1633530583,
+                                    "_nanoseconds": 8833530583
+                                },
+                                "updatedAt": {
+                                    "_seconds": 1633530583,
+                                    "_nanoseconds": 8833530583
+                                }
+                            }
+                        ]
+                    }
+                },
+                "title": "Get listings",
+                "properties": {
+                    "listings": {
+                        "type": "array",
+                        "uniqueItems": true,
+                        "minItems": 1,
+                        "description": "Array of listings that match search",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "images": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Path to the image bucket",
+                                    "example": "listings/0t36Pf9h8s98sh9g8LCtRZrw9/73wj0gwg-w-g-wgb-8078-ee5dd1107eec/"
+                                },
+                                "creatorId": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Id of the creator of the listing",
+                                    "example": "fpjhw09hg0wh4g0whg4g"
+                                },
+                                "askingPrice": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Price of product",
+                                    "example": "99"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Detailed descrtiption of the product",
+                                    "example": "Fun toy"
+                                },
+                                "pickup": {
+                                    "type": "boolean",
+                                    "description": "Whether pickup is possible"
+                                },
+                                "listingId": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Unique id of the listing",
+                                    "example": "f0ihw03shg08hg0s8hgs3"
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Title of the listing",
+                                    "example": "Toy car"
+                                },
+                                "manufacturer": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Manufacturer of the product",
+                                    "example": "Hasbro"
+                                },
+                                "shipping": {
+                                    "type": "boolean",
+                                    "description": "Whether shipping is possible"
+                                },
+                                "location": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Location of product being sold",
+                                    "example": "Helsinki"
+                                },
+                                "category": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Category of product",
+                                    "example": "Toys"
+                                },
+                                "createdAt": {
+                                    "type": "object",
+                                    "description": "Timestamp of when listing was created",
+                                    "properties": {
+                                        "_seconds": {
+                                            "type": "number",
+                                            "example": 1633530583
+                                        },
+                                        "_nanoseconds": {
+                                            "type": "number",
+                                            "example": 8833530583
+                                        }
+                                    }
+                                },
+                                "updatedAt": {
+                                    "type": "object",
+                                    "description": "Timestamp of when listing was last modified",
+                                    "properties": {
+                                        "_seconds": {
+                                            "type": "number",
+                                            "example": 1633530583
+                                        },
+                                        "_nanoseconds": {
+                                            "type": "number",
+                                            "example": 8833530583
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "HTTPBasic": {
+                "type": "http",
+                "scheme": "basic",
+                "description": ""
+            },
+            "HTTPBearer": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    }
+}
